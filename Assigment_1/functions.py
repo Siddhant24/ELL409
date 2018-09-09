@@ -8,6 +8,29 @@ RANDOM_SEED = 42
 np.random.seed(RANDOM_SEED)
 random.seed(RANDOM_SEED)
 
+#UTILITY FUNCTIONS
+def project(X, U, p = None):
+    if p == None: p = X.shape[1]
+    Z = np.matmul(X, U)
+    Z[:, p:] = np.mean(Z[:, p:], axis = 0)
+    X2 = np.matmul(Z, U.transpose())
+    return (Z, X2)
+def PCA(X, threshold = 0.9):
+    X2 = X - np.mean(X, axis = 0)
+    S = np.matmul(X2.transpose(), X2) #Covariance Matrix
+    [W,U] = np.linalg.eigh(S) #eigen vectors in columns
+    W = np.flip(W, axis = 0)
+    U = np.flip(U, axis = 1)
+    
+    validity = np.cumsum(W)/np.sum(W)  #represents validity of choosing first i+1 eigenvalues
+    p = np.argmax(validity>=threshold) + 1
+    if p==1: p = X.shape[1]
+    
+    [Z, X3] = project(X, U, p)
+    
+    #Projection, P, Reconstruction, EigenVectors, EigenValues
+    return [Z, p, X3, U, W]
+################################################################
 
 #DISTANCES
 def euclideanDistance (X,y):
@@ -23,7 +46,7 @@ def chebyschevDistance (X,y):
 ################################################################
 
 from mnist import MNIST
-def prepareFMNISTData(scale = 0):
+def prepareFMNISTData(scale = 0, PCA_threshold = 1):
     mndata = MNIST('fashion_data')
     imagesTrain,labelsTrain = mndata.load_training()
     imagesTest, labelsTest = mndata.load_testing()
@@ -39,12 +62,20 @@ def prepareFMNISTData(scale = 0):
     trainingIndex = indices[:int(4*n/5)]
     validationIndex = indices[int(4*n/5):]
 
+
     X_train = np.array(imagesTrain)[trainingIndex]
     y_train = np.array(labelsTrain)[trainingIndex]
     
     X_val = np.array(imagesTrain)[validationIndex]
     y_val = np.array(labelsTrain)[validationIndex]
-    
+
+    [Z_train, p, Xr, U, W] = PCA(X_train, PCA_threshold)
+    [Z_test, Xr] = project(X_test, U, p)
+    [Z_val, Xr] = project(X_val, U, p)
+    X_train = Z_train[:, :p]
+    X_val = Z_val[:, :p]
+    X_test = Z_test[:, :p]
+
     if(scale == 1):
         mean = np.mean(X_train, axis = 0)
         X_train = X_train - mean
@@ -107,10 +138,6 @@ def prepareRailwayData(scale = 0):
     #membercount from 0 to 10, add 1
     #preferredClass : FIRST_AC, NO_PREF, SECOND_AC, THIRD_AC
     #Age is age category 0 to 8
-
-
-
-
     railwayData = pd.read_csv('railwayBookingList.csv')
 
     railwayData['sex'] = railwayData['sex'].map({'female': 1, 'male': 0})
@@ -190,5 +217,7 @@ def naiveBayesClassifier(testX, trainX, trainY, estimator, h , distanceMetric = 
 #Evaluation Metrics
 def accuracy(prediction, actual):
     return np.sum(prediction==actual)/prediction.shape[0]
+
+
 
 
