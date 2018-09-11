@@ -9,6 +9,8 @@ RANDOM_SEED = 42
 np.random.seed(RANDOM_SEED)
 random.seed(RANDOM_SEED)
 
+
+
 #UTILITY FUNCTIONS
 def project(X, U, p = None):
     if p == None: p = X.shape[1]
@@ -31,7 +33,6 @@ def PCA(X, threshold = 0.9):
     
     #Projection, P, Reconstruction, EigenVectors, EigenValues
     return [Z, p, X3, U, W]
-
 def whiteningTransform(X, W, U):
 	L = np.diag(W)
 	Z = np.transpose(np.matmul(np.matmul(sc.linalg.fractional_matrix_power(L, -0.5), U.transpose()), (X - np.mean(X, axis = 0)).transpose()))
@@ -248,6 +249,23 @@ def naiveBayesClassifier(testX, trainX, trainY, estimator, h , distanceMetric = 
 #Evaluation Metrics
 def accuracy(prediction, actual):
     return np.sum(prediction==actual)/prediction.shape[0]
+def recall(prediction, actual, target):
+	prediction = (prediction == target)
+	actual = (actual==target)
+	if(np.sum(actual) == 0): return 1.0
+	return np.sum(prediction&actual>0)/np.sum(actual)
+
+def precision(prediction, actual, target):
+	prediction = (prediction == target)
+	actual = (actual==target)
+	if(np.sum(prediction) == 0): return 1.0
+	return np.sum(prediction&actual>0)/np.sum(prediction)
+
+def f1Score(prediction, actual, target):
+	prec = precision(prediction, actual, target)
+	rec = recall(prediction, actual, target)
+	return 2*prec*rec/(prec + rec)
+
 
 
 
