@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
 import matplotlib as plt
-import scipy as sc
+import scipy.linalg
+from PCA import *
 
 import time
 import random

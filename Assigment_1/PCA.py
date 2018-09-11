@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib as plt
-import scipy as sc
+import scipy.linalg
 from distance_metrics import *
 
 import time
@@ -45,5 +45,5 @@ def PCA(X, threshold = 0.9):
 
 def whiteningTransform(X, W, U):
 	L = np.diag(W)
-	Z = np.transpose(np.matmul(np.matmul(sc.linalg.fractional_matrix_power(L, -0.5), U.transpose()), (X - np.mean(X, axis = 0)).transpose()))
+	Z = np.transpose(np.matmul(np.matmul(scipy.linalg.fractional_matrix_power(L, -0.5), U.transpose()), (X - np.mean(X, axis = 0)).transpose()))
 	return Z
