@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib as plt
+import scipy as sc
 
 import time
 import random
@@ -30,6 +31,12 @@ def PCA(X, threshold = 0.9):
     
     #Projection, P, Reconstruction, EigenVectors, EigenValues
     return [Z, p, X3, U, W]
+def whiteningTransform(X):
+    [Z, p, X3, U, W] = PCA(X, 1.0)
+    X2 = X - np.mean(X, axis = 0)
+    L = np.diag(W)
+    X4 = np.matmul(np.matmul(sc.linalg.fractional_matrix_power(L, -0.5), U), X)
+    return X4
 ################################################################
 
 #DISTANCES
