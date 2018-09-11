@@ -31,12 +31,13 @@ def PCA(X, threshold = 0.9):
     
     #Projection, P, Reconstruction, EigenVectors, EigenValues
     return [Z, p, X3, U, W]
-def whiteningTransform(X):
-    [Z, p, X3, U, W] = PCA(X, 1.0)
-    X2 = X - np.mean(X, axis = 0)
-    L = np.diag(W)
-    X4 = np.matmul(np.matmul(sc.linalg.fractional_matrix_power(L, -0.5), U), X)
-    return X4
+
+def whiteningTransform(X, W, U):
+	L = np.diag(W)
+	Z = np.transpose(np.matmul(np.matmul(sc.linalg.fractional_matrix_power(L, -0.5), U.transpose()), (X - np.mean(X, axis = 0)).transpose()))
+	return Z
+
+
 ################################################################
 
 #DISTANCES
@@ -48,12 +49,12 @@ def manhattenDistance (X,y):
     else: return np.sum((np.abs(X - y)), axis = 1)
 def chebyschevDistance (X,y): 
     if len(X.shape)==1: return np.max(np.abs(X-y))
-    else: return np.array((np.abs(X - y)), axis = 1)
+    else: return np.array(np.max((np.abs(X - y)), axis = 1))
 
 ################################################################
 
 from mnist import MNIST
-def prepareFMNISTData(scale = 0, PCA_threshold = 1):
+def prepareFMNISTData(scale = 0, PCA_threshold = -1, Whitening = 0):
     mndata = MNIST('fashion_data')
     imagesTrain,labelsTrain = mndata.load_training()
     imagesTest, labelsTest = mndata.load_testing()
@@ -76,12 +77,15 @@ def prepareFMNISTData(scale = 0, PCA_threshold = 1):
     X_val = np.array(imagesTrain)[validationIndex]
     y_val = np.array(labelsTrain)[validationIndex]
 
-    [Z_train, p, Xr, U, W] = PCA(X_train, PCA_threshold)
-    [Z_test, Xr] = project(X_test, U, p)
-    [Z_val, Xr] = project(X_val, U, p)
-    X_train = Z_train[:, :p]
-    X_val = Z_val[:, :p]
-    X_test = Z_test[:, :p]
+    if(PCA_threshold != -1):
+
+    	[Z_train, p, Xr, U, W] = PCA(X_train, PCA_threshold)
+    	[Z_test, Xr] = project(X_test, U, p)
+    	[Z_val, Xr] = project(X_val, U, p)
+    	X_train = Z_train[:, :p]
+    	X_val = Z_val[:, :p]
+    	X_test = Z_test[:, :p]
+    	print("PCA_Threshold = " + str(PCA_threshold) + ", P = " + str(p))
 
     if(scale == 1):
         mean = np.mean(X_train, axis = 0)
@@ -94,9 +98,14 @@ def prepareFMNISTData(scale = 0, PCA_threshold = 1):
         X_test = X_test/np.sqrt(variance)
         X_val = X_val/np.sqrt(variance)
 
+    if(Whitening == 1):
+    	[Z, p, X3, U, W] = PCA(X_train, 1.0)
+    	X_train = whiteningTransform(X_train, W, U)
+    	X_test = whiteningTransform(X_test, W, U)
+    	X_val = whiteningTransform(X_val, W, U)
 
     return (X_train, y_train, X_val, y_val, X_test, y_test) 
-def prepareMedicalData(scale = 0):
+def prepareMedicalData(scale = 0, PCA_threshold = -1, Whitening = 0):
     medicalData = pd.read_csv('Medical_data.csv')
     
     '''
@@ -122,6 +131,7 @@ def prepareMedicalData(scale = 0):
 
     X_train = X[trainingIndex]
     y_train = y[trainingIndex]
+    
 
     if(scale == 1):
         mean = np.mean(X_train, axis = 0)
@@ -132,12 +142,26 @@ def prepareMedicalData(scale = 0):
         X_train = X[trainingIndex]
         y_train = y[trainingIndex]
         
-    
     X_val = X[validationIndex]
     y_val = y[validationIndex]
 
     X_test = X[testIndex]
     y_test = y[testIndex]
+
+    if(PCA_threshold!=-1):
+    	[Z_train, p, Xr, U, W] = PCA(X_train, PCA_threshold)
+    	[Z_test, Xr] = project(X_test, U, p)
+    	[Z_val, Xr] = project(X_val, U, p)
+    	X_train = Z_train[:, :p]
+    	X_val = Z_val[:, :p]
+    	X_test = Z_test[:, :p]
+
+    if(Whitening == 1):
+    	[Z, p, X3, U, W] = PCA(X_train, 1.0)
+    	X_train = whiteningTransform(X_train, W, U)
+    	X_test = whiteningTransform(X_test, W, U)
+    	X_val = whiteningTransform(X_val, W, U)
+    
 
     return (X_train, y_train, X_val, y_val, X_test, y_test)
 def prepareRailwayData(scale = 0):
