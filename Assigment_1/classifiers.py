@@ -5,6 +5,7 @@ import scipy.linalg
 import time
 import random
 from distance_metrics import *
+from evaluation_metrics import *
 
 RANDOM_SEED = 42
 np.random.seed(RANDOM_SEED)
@@ -108,6 +109,14 @@ def closest_centroid(X, centroids, distanceMetric = euclideanDistance):
 
 def reassign_centroids(X, closest, centroids):
     """returns the new centroids assigned from the points closest to them"""
+    '''
+    centrs = []
+    for k in range(centroids.shape[0]):
+        if np.sum(closest==k) == 0: centrs.append(centroids[k])
+        else: centrs.append(X[closest==k].mean(axis=0))
+    return np.array(centrs)
+    '''
+
     return np.array([X[closest==k].mean(axis=0) for k in range(centroids.shape[0])])
 
 def KMeansClustering(X, K=3, distanceMetric = euclideanDistance):
@@ -122,17 +131,48 @@ def KMeansClustering(X, K=3, distanceMetric = euclideanDistance):
         centroids = reassign_centroids(X, closest_centroid(X, centroids, distanceMetric), centroids)
         numiter = numiter+1
         err = np.max(distanceMetric(prev_centroids, centroids))
-    print(numiter)
     return centroids
 
 def KMeansClassifier(testX,trainX,trainY, K = 3, distanceMetric = euclideanDistance):    
     """returns the label of the cluster to which a test point is assigned to"""
     centroids = KMeansClustering(trainX, K, distanceMetric)
     assigned_clusters = closest_centroid(trainX, centroids, distanceMetric)
+
     A = np.unique(trainY)
     clusterFreq = np.zeros([K, len(A)], dtype=int)
     for idx in range(assigned_clusters.shape[0]):
         clusterFreq[assigned_clusters[idx]][trainY[idx]] += 1
     clusterClass = [np.argmax(clusterFreq[idx]) for idx in range(K)]        
     predY = [clusterClass[x] for x in closest_centroid(testX, centroids, distanceMetric)]
-    return np.array(predY)
+    return [np.array(predY), centroids]
+
+def kMeansClassifierAuto(testX, trainX, trainY, valX, valY, it = 10, distanceMetric = euclideanDistance):
+    kList = [1,2,4,8,16,32,64,128, 256, 512]
+    
+    maxCentr = None
+    maxAcc = 0
+    maxK = 0
+
+    for k in kList:
+        for i in range(it):
+            [predY, centroids] = KMeansClassifier(valX, trainX, trainY, k, distanceMetric)
+            acc = accuracy(predY, valY);
+            #print(k, i, acc)
+            if(acc>maxAcc):
+                maxK = k 
+                maxAcc = acc 
+                maxCentr = centroids
+
+    assigned_clusters = closest_centroid(trainX, maxCentr, distanceMetric)
+
+    A = np.unique(trainY)
+    clusterFreq = np.zeros([maxK, len(A)], dtype=int)
+    for idx in range(assigned_clusters.shape[0]):
+        clusterFreq[assigned_clusters[idx]][trainY[idx]] += 1
+    clusterClass = [np.argmax(clusterFreq[idx]) for idx in range(maxK)]        
+    predY = [clusterClass[x] for x in closest_centroid(testX, maxCentr, distanceMetric)]
+    
+    return [np.array(predY), maxK, maxAcc]
+
+
+        

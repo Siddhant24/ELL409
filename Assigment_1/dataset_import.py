@@ -86,7 +86,7 @@ def prepareMedicalData(scale = 0, PCA_threshold = -1, Whitening = 0):
     print("GROUPED Standard Deviation")
     print(medicalData[['Health', 'TEST1', 'TEST2', 'TEST3']].groupby('Health').std())
     '''
-
+    
     medicalData['Health'] = medicalData['Health'].map({'HEALTHY': 0, 'MEDICATION': 1, 'SURGERY': 2}).astype(int)
     # Healthy == 0
     # Medication == 1
