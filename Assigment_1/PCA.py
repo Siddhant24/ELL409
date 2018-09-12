@@ -38,7 +38,6 @@ def PCA(X, threshold = 0.9):
     #Projection, P, Reconstruction, EigenVectors, EigenValues
     return [Z, p, X3, U, W]
 
-
 ################################################################
 		# Whitening #
 ################################################################

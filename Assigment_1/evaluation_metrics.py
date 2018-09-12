@@ -34,3 +34,4 @@ def f1Score(prediction, actual, target):
 	prec = precision(prediction, actual, target)
 	rec = recall(prediction, actual, target)
 	return 2*prec*rec/(prec + rec)
+	

@@ -27,6 +27,42 @@ def knnClassifier(testX,trainX,trainY, K = 1, distanceMetric = euclideanDistance
     return np.array(predY)
 
 
+################################################################
+        #  Non parametric density estimators #
+################################################################
+
+def kNearestNeighboursEstimation(testX, trainX, funcN = lambda n: np.sqrt(n), distanceMetric = euclideanDistance) :
+    [n,d] = trainX.shape
+    k = min( max((int)(funcN(n)), 10) , n-1)
+    indices, radius = getKNeighbours(testX, trainX, k, distanceMetric)
+    predY = np.array([k/(n*(np.float_power(rad, d))) for rad in radius])
+    return predY
+  
+def kNearestNeighboursEstimationAuto(testX, trainX, valX, distanceMetric = euclideanDistance, kList = None):
+    if kList is None: kList = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
+    estimates = np.array([kNearestNeighboursEstimation(valX, trainX, lambda n: k, distanceMetric) for k in kList])
+    logLikelyhood = np.sum(np.log(estimates), axis = 1)
+    k = kList[np.argmax(logLikelyhood)]
+    return kNearestNeighboursEstimation(testX, trainX, lambda n: k, distanceMetric)
+
+def parzenWindowEstimation_gaussian(testX, trainX, h = 1, distanceMetric = euclideanDistance):
+    d = trainX.shape[1]
+    estimates = np.array([np.mean(np.exp(-np.square(distanceMetric(trainX, testx))/(2*(h*h)))/h) for testx in testX])
+    return estimates
+
+def parzenWindowEstimationAuto_gaussian(testX, trainX, valX, distanceMetric = euclideanDistance, hList = None, it = 2):
+    if hList is None: hList = [0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30, 100, 300, 1000, 3000, 10000]
+
+    estimates = np.array([parzenWindowEstimation_gaussian(valX, trainX, h, distanceMetric) for h in hList])
+    logLikelyhood = np.sum(np.log(estimates), axis = 1)
+    h = hList[np.argmax(logLikelyhood)]
+    #print(h)
+    if(it>1):
+        hList2 = np.random.rand(25)*(1.5*h) + (h/2)
+        return parzenWindowEstimationAuto_gaussian(testX, trainX, valX, distanceMetric, hList2, it-1)
+    
+    return parzenWindowEstimation_gaussian(testX, trainX, h , distanceMetric)
+        
 
 ################################################################
 		# B A Y E S #
@@ -37,6 +73,10 @@ def bayesClassifier(testX, trainX, trainY, estimator, h = 1 , distanceMetric = e
     q = np.array([priors[idx]*estimator(testX, trainX[np.where(trainY == A[idx])], h, distanceMetric) for idx in range(len(A))])
     return np.array([A[idx] for idx in np.argmax(q, axis = 0)])
 
+def bayesClassifierAuto(testX, trainX, trainY, valX, valY, estimatorAuto, distanceMetric):
+    A, priors = np.unique(trainY, return_counts = True)
+    q = np.array([priors[idx]*estimatorAuto(testX, trainX[np.where(trainY == A[idx])], valX[np.where(valY==A[idx])], distanceMetric) for idx in range(len(A))])
+    return np.array([A[idx] for idx in np.argmax(q, axis = 0)])
 
 def naiveBayesClassifier(testX, trainX, trainY, estimator, h , distanceMetric = euclideanDistance):
     A, priors = np.unique(trainY, return_counts = True)
