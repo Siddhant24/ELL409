@@ -46,6 +46,13 @@ def kNearestNeighboursEstimationAuto(testX, trainX, valX, distanceMetric = eucli
     k = kList[np.argmax(logLikelyhood)]
     return kNearestNeighboursEstimation(testX, trainX, lambda n: k, distanceMetric)
 
+def parzenWindowEstimation_hypercube(testX, trainX, h = 1, distanceMetric = euclideanDistance):
+    d = trainX.shape[1]
+    n = trainX.shape[0]
+    V = np.power(h,d)
+    estimates = np.array([(np.sum(distanceMetric(trainX, testx) < h/2))/(n*V) for testx in testX])
+    return estimates
+
 def parzenWindowEstimation_gaussian(testX, trainX, h = 1, distanceMetric = euclideanDistance):
     d = trainX.shape[1]
     estimates = np.array([np.mean(np.exp(-np.square(distanceMetric(trainX, testx))/(2*(h*h)))/h) for testx in testX])
