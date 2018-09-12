@@ -119,7 +119,13 @@ def prepareMedicalData(scale = 0, PCA_threshold = -1, Whitening = 0):
 
     X_test = X[testIndex]
     y_test = y[testIndex]
-
+    
+    if(Whitening == 1):
+    	[Z, p, X3, U, W] = PCA(X_train, 1.0)
+    	X_train = whiteningTransform(X_train, W, U)
+    	X_test = whiteningTransform(X_test, W, U)
+    	X_val = whiteningTransform(X_val, W, U)
+        
     if(PCA_threshold!=-1):
     	[Z_train, p, Xr, U, W] = PCA(X_train, PCA_threshold)
     	[Z_test, Xr] = project(X_test, U, p)
@@ -128,11 +134,7 @@ def prepareMedicalData(scale = 0, PCA_threshold = -1, Whitening = 0):
     	X_val = Z_val[:, :p]
     	X_test = Z_test[:, :p]
 
-    if(Whitening == 1):
-    	[Z, p, X3, U, W] = PCA(X_train, 1.0)
-    	X_train = whiteningTransform(X_train, W, U)
-    	X_test = whiteningTransform(X_test, W, U)
-    	X_val = whiteningTransform(X_val, W, U)
+    
     
 
     return (X_train, y_train, X_val, y_val, X_test, y_test)
