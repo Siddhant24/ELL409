@@ -71,6 +71,18 @@ def parzenWindowEstimationAuto_gaussian(testX, trainX, valX, distanceMetric = eu
     
     return parzenWindowEstimation_gaussian(testX, trainX, h , distanceMetric)
         
+from scipy.stats import multivariate_normal
+def maximumLikelyhoodEstimation(testX, trainX, a=0, b=0, c=0):
+    #Find mu, sigma to fit to train data
+    #Find estimates of test points
+    n = trainX.shape[0]
+    mu = np.mean(trainX, axis = 0, keepdims = True)
+    X = (trainX - mu)
+
+    sigma = (np.matmul((trainX - mu).T, (trainX - mu))*(1/n))
+    return multivariate_normal.pdf(testX, mean = mu[0,:], cov = sigma) 
+
+
 
 ################################################################
 		# B A Y E S #
@@ -86,7 +98,7 @@ def bayesClassifierAuto(testX, trainX, trainY, valX, valY, estimatorAuto, distan
     q = np.array([priors[idx]*estimatorAuto(testX, trainX[np.where(trainY == A[idx])], valX[np.where(valY==A[idx])], distanceMetric) for idx in range(len(A))])
     return np.array([A[idx] for idx in np.argmax(q, axis = 0)])
 
-def naiveBayesClassifier(testX, trainX, trainY, estimator, h , distanceMetric = euclideanDistance):
+def naiveBayesClassifier(testX, trainX, trainY, estimator, h=None, distanceMetric = euclideanDistance):
     A, priors = np.unique(trainY, return_counts = True)
     d = trainX.shape[1]
     q = np.zeros([testX.shape[0], len(A)])

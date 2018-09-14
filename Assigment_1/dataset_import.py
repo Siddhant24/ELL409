@@ -18,7 +18,7 @@ random.seed(RANDOM_SEED)
 		# FMNIST #
 ################################################################
 from mnist import MNIST
-def prepareFMNISTData(scale = 0, PCA_threshold = -1, Whitening = 0):
+def prepareFMNISTData(scale = 0, PCA_threshold = -1, Whitening = 0, PCA_p = None):
     mndata = MNIST('fashion_data')
     imagesTrain,labelsTrain = mndata.load_training()
     imagesTest, labelsTest = mndata.load_testing()
@@ -34,7 +34,6 @@ def prepareFMNISTData(scale = 0, PCA_threshold = -1, Whitening = 0):
     trainingIndex = indices[:int(4*n/5)]
     validationIndex = indices[int(4*n/5):]
 
-
     X_train = np.array(imagesTrain)[trainingIndex]
     y_train = np.array(labelsTrain)[trainingIndex]
     
@@ -43,13 +42,14 @@ def prepareFMNISTData(scale = 0, PCA_threshold = -1, Whitening = 0):
 
     if(PCA_threshold != -1):
 
-    	[Z_train, p, Xr, U, W] = PCA(X_train, PCA_threshold)
-    	[Z_test, Xr] = project(X_test, U, p)
-    	[Z_val, Xr] = project(X_val, U, p)
-    	X_train = Z_train[:, :p]
-    	X_val = Z_val[:, :p]
-    	X_test = Z_test[:, :p]
-    	print("PCA_Threshold = " + str(PCA_threshold) + ", P = " + str(p))
+        [Z_train, p, Xr, U, W] = PCA(X_train, PCA_threshold)
+        if PCA_p is not None: p = PCA_p
+        [Z_test, Xr] = project(X_test, U, p)
+        [Z_val, Xr] = project(X_val, U, p)
+        X_train = Z_train[:, :p]
+        X_val = Z_val[:, :p]
+        X_test = Z_test[:, :p]
+        print("PCA_Threshold = " + str(PCA_threshold) + ", P = " + str(p))
 
     if(scale == 1):
         mean = np.mean(X_train, axis = 0)
