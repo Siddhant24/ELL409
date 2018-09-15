@@ -17,6 +17,7 @@ random.seed(RANDOM_SEED)
 
 def getKNeighbours(testX, trainX, K = 1, distanceMetric = euclideanDistance):
     dists = np.array([distanceMetric(trainX, testx) for testx in testX])
+    
     ind = np.argpartition(dists, K, axis = 1)[:, 0:K]    
     radius = np.array( [dists[row, ind[row, K-1]] for row in range(testX.shape[0])])
     return [ind, radius ]

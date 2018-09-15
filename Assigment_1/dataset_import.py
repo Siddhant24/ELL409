@@ -152,10 +152,10 @@ def prepareRailwayData(scale = 0):
     #Age is age category 0 to 8
     railwayData = pd.read_csv('railwayBookingList.csv')
 
-    railwayData['sex'] = railwayData['sex'].map({'female': 1, 'male': 0})
+    railwayData['sex'] = railwayData['sex'].map({'female': 0, 'male': 1})
     railwayData.fillna(0, inplace = True)
     railwayData['memberCount'] = railwayData['memberCount'] + 1
-    railwayData['preferredClass'] = railwayData['preferredClass'].map({'FIRST_AC': 3, 'SECOND_AC': 2, 'THIRD_AC': 1, 'NO_PREF': 0})
+    railwayData['preferredClass'] = railwayData['preferredClass'].map({'FIRST_AC': 1, 'SECOND_AC': 2, 'THIRD_AC': 3, 'NO_PREF': 0})
 
     X = railwayData.values[::, 2::]
     y = railwayData.values[::, 1].astype(int)
