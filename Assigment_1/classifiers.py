@@ -82,8 +82,6 @@ def maximumLikelyhoodEstimation(testX, trainX, a=0, b=0, c=0):
     sigma = (np.matmul((trainX - mu).T, (trainX - mu))*(1/n))
     return multivariate_normal.pdf(testX, mean = mu[0,:], cov = sigma) 
 
-
-
 ################################################################
 		# B A Y E S #
 ################################################################
@@ -104,11 +102,9 @@ def naiveBayesClassifier(testX, trainX, trainY, estimator, h=None, distanceMetri
     q = np.zeros([testX.shape[0], len(A)])
     for idx in range(len(A)):
         trainX_class_split = trainX[np.where(trainY == A[idx])]
-        q[:,idx] = priors[idx]*np.prod([estimator(testX[:,i], np.array([trainX_class_split[:,i]]).transpose(), h, distanceMetric) for i in range(d)], axis=0)
+        q[:,idx] = priors[idx]*np.sum(np.log([estimator(testX[:,i], np.array([trainX_class_split[:,i]]).transpose(), h, distanceMetric) for i in range(d)]), axis=0)
     
     return np.array([A[idx] for idx in np.argmax(q, axis = 1)])
-
-
 
 ################################################################
 	# K - M E A N S #
