@@ -125,15 +125,15 @@ def closest_centroid(X, centroids, distanceMetric = euclideanDistance):
 
 def reassign_centroids(X, closest, centroids):
     """returns the new centroids assigned from the points closest to them"""
-    '''
+    
     centrs = []
     for k in range(centroids.shape[0]):
         if np.sum(closest==k) == 0: centrs.append(centroids[k])
         else: centrs.append(X[closest==k].mean(axis=0))
     return np.array(centrs)
-    '''
+    
 
-    return np.array([X[closest==k].mean(axis=0) for k in range(centroids.shape[0])])
+#     return np.array([X[closest==k].mean(axis=0) for k in range(centroids.shape[0])])
 
 def KMeansClustering(X, K=3, distanceMetric = euclideanDistance):
     """returns K cluster centers"""
