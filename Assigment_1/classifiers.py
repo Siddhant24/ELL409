@@ -37,6 +37,7 @@ def kNearestNeighboursEstimation(testX, trainX, funcN = lambda n: np.sqrt(n), di
     [n,d] = trainX.shape
     k = min( max((int)(funcN(n)), 10) , n-1)
     indices, radius = getKNeighbours(testX, trainX, k, distanceMetric)
+    radius = [rad + 0.000001 for rad in radius]
     predY = np.array([k/(n*(np.float_power(rad, d))) for rad in radius])
     return predY
   
@@ -103,7 +104,7 @@ def naiveBayesClassifier(testX, trainX, trainY, estimator, h=None, distanceMetri
     q = np.zeros([testX.shape[0], len(A)])
     for idx in range(len(A)):
         trainX_class_split = trainX[np.where(trainY == A[idx])]
-        q[:,idx] = priors[idx]*np.sum(np.log([estimator(testX[:,i], np.array([trainX_class_split[:,i]]).transpose(), h, distanceMetric) for i in range(d)]), axis=0)
+        q[:,idx] = np.log(priors[idx]) + np.sum(np.log([estimator(testX[:,i], np.array([trainX_class_split[:,i]]).transpose(), h, distanceMetric) for i in range(d)]), axis=0)
     
     return np.array([A[idx] for idx in np.argmax(q, axis = 1)])
 

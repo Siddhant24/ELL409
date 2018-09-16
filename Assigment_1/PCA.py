@@ -31,7 +31,8 @@ def PCA(X, threshold = 0.9):
     
     validity = np.cumsum(W)/np.sum(W)  #represents validity of choosing first i+1 eigenvalues
     p = np.argmax(validity>=threshold) + 1
-    if p==1: p = X.shape[1]
+    
+    if p<=1 or threshold == 1: p = X.shape[1]
     
     [Z, X3] = project(X, U, p)
     
