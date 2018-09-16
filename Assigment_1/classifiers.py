@@ -80,7 +80,6 @@ def maximumLikelyhoodEstimation(testX, trainX, a=0, b=0, c=0):
     n = trainX.shape[0]
     mu = np.mean(trainX, axis = 0, keepdims = True)
     X = (trainX - mu)
-
     sigma = (np.matmul((trainX - mu).T, (trainX - mu))*(1/n))
     return multivariate_normal.pdf(testX, mean = mu[0,:], cov = sigma) 
 

@@ -103,7 +103,7 @@ def prepareMedicalData(scale = 0, PCA_threshold = -1, Whitening = 0):
 
 
     n = X.shape[0]
-    np.random.seed(RANDOM_SEED)
+    np.random.seed(RANDOM_SEED )
     indices = np.random.permutation(n)
     trainingIndex = indices[:int(5*n/6)]
     validationIndex = indices[int(5*n/6):]
