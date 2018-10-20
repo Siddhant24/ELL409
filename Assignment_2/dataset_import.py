@@ -180,9 +180,9 @@ def prepareRailwayData(scale = 0, PCA_threshold = -1, Whitening = 0, OneHotEncod
     n = X.shape[0]
     np.random.seed(RANDOM_SEED)
     indices = np.random.permutation(n)
-    trainingIndex = indices[:int(4*n/6)]
-    validationIndex = indices[int(4*n/6): int(5*n/6)]
-    testIndex = indices[int(5*n/6):]
+    trainingIndex = indices[:int(5*n/6)]
+    validationIndex = indices[int(5*n/6): int(5*n/6)+1]
+    testIndex = indices[int(5*n/6)+1:]
 
     X_train = X[trainingIndex]
     y_train = y[trainingIndex]

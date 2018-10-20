@@ -176,7 +176,7 @@ def prepareRailwayData(scale = 0, PCA_threshold = -1, Whitening = 0, OneHotEncod
     y = railwayData.values[::, 1].astype(int)
     
 
-        
+    
     n = X.shape[0]
     np.random.seed(RANDOM_SEED)
     indices = np.random.permutation(n)
