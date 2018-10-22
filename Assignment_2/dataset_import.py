@@ -31,8 +31,8 @@ def prepareFMNISTData(scale = 0, PCA_threshold = -1, Whitening = 0, PCA_p = None
     np.random.seed(RANDOM_SEED)
     indices = np.random.permutation(n)
 
-    trainingIndex = indices[:int(4*n/5)]
-    validationIndex = indices[int(4*n/5):]
+    trainingIndex = indices[:int(n-2)]
+    validationIndex = indices[int(n-2):]
 
     X_train = np.array(imagesTrain)[trainingIndex]
     y_train = np.array(labelsTrain)[trainingIndex]
